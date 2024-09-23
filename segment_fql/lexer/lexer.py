@@ -1,5 +1,5 @@
-from segment_fql.token import Token
-from segment_fql.token_type import TokenType
+from segment_fql.lexer.token import Token
+from segment_fql.lexer.token_type import TokenType
 
 class Lexer:
     def __init__(self, text):
@@ -35,6 +35,20 @@ class Lexer:
             self._advance()
         return int(result)
 
+    def _lexIdentifier(self):
+        result = ''
+        while self.current_char is not None and self.current_char.isalpha():
+            result += self.current_char
+            self._advance()
+
+        return Token(TokenType.Ident, result)
+
+    def _lexOperatorOrConditional(self, previous):
+        if previous == '=':
+            return Token(TokenType.Operator, '=')
+
+        return Token(TokenType.Operator, self.current_char)
+
     def _lexString(self):
         self._advance()
         result = ''
@@ -52,6 +66,16 @@ class Lexer:
 
             if self.current_char.isdigit():
                 return Token(TokenType.Number, self._integer())
+
+            if self.current_char == '!':
+                next_char = self.text[self.pos + 1]
+                if next_char == '(':
+                    self._advance()
+                    return Token(TokenType.Operator, '!')
+                elif next_char == '=':
+                    self._advance()
+                    self._advance()
+                    return Token(TokenType.Operator, '!=')
 
             if self.current_char == '=':
                 self._advance()
@@ -84,9 +108,12 @@ class Lexer:
             if self.current_char == '"':
                 return self._lexString()
 
+            if self.current_char.isalpha():
+                return self._lexIdentifier()
+
             self.error()
 
-        return Token(TokenType.EOS, None)
+        return Token(TokenType.EOS, 'eos')
 
     def error(self):
         raise Exception('Invalid character')
