@@ -33,42 +33,38 @@ class Parser:
 
         raise Exception(f'Unexpected token in statement: {self.queue[0].type} ({self.queue[0].value})')
 
-    def _conditional(self):
+    def _conditional(self, left_operand):
         node = ASTNode(ASTType.CONDITIONAL)
-        node.children.append(self._next())
+        node.children.append(left_operand)
+        operator = self._next()
+        node.children.append(operator)
+        right_operand = self.queue[0]
+
+        # Paths or functions
+        if right_operand.type == TokenType.Ident:
+            node.children.append(self._pathOrFunction(self._next()))
+        # Lists
+        elif right_operand.type == TokenType.BrackLeft:
+            node.children.append(self._list())
+        else:
+            node.children.append(self._next())
+
         return node
 
     def _expression(self):
-        node = ASTNode(ASTType.EXPR)
+        first_child = self._next()
         upcoming = self.queue[0]
 
-        # Strings
-        if upcoming.type == TokenType.String:
-            node.children.append(self._next())
-            return node
+        if upcoming.type not in [TokenType.Operator, TokenType.Ident, TokenType.Number, TokenType.String, TokenType.Null, TokenType.BrackLeft]:
+            raise Exception(f'Unsupported token: {upcoming.type} ({upcoming.value})')
 
-        # Numbers
-        if upcoming.type == TokenType.Number:
-            node.children.append(self._next())
-            return node
+        if upcoming.type == TokenType.Operator:
+            return self._conditional(first_child)
 
-        # Null
-        if upcoming.type == TokenType.Null:
-            node.children.append(self._next())
-            return node
-
-        # Paths or functions
-        if upcoming.type == TokenType.Ident:
-            node.children.append(self._pathOrFunction(self._next()))
-            return node
-
-        # Lists
-        if upcoming.type == TokenType.BrackLeft:
-            node.children.append(self._list())
-            return node
-
-        # Unrecognized Tokens
-        raise Exception(f'Unsupported or unrecognized token: {upcoming.type} ({upcoming.value})')
+        node = ASTNode(ASTType.EXPR)
+        node.children.append(first_child)
+        return node
+        
 
     def _operator(self):
         node = ASTNode(ASTType.OPERATOR)
@@ -141,7 +137,7 @@ class Parser:
             if token.type == TokenType.EOS:
                 return root_node
 
-            root_node.children.append(self._conditional())
+            root_node.children.append(self._operator())
             root_node.children.append(self._statement())
 
         raise Exception(f'Unexpected token of type "type" and value "value"')

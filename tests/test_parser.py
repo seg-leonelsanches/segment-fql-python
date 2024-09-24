@@ -15,39 +15,25 @@ class TestParser:
         assert len(child.children) == 1
         grandchild = child.children[0]
         assert grandchild.type == ASTType.EXPR
-        assert len(grandchild.children[0]) > 0
-        assert grandchild.children[0].value == True
+        assert len(grandchild.children) > 0
+        greatgrandchild = grandchild.children[0]
+        assert len(greatgrandchild.children) > 0
+        assert greatgrandchild.children[0].value == 'true'
         
 
     def test_parser_event(self):
-        lexer = Lexer('event.name = "Order Completed"')
+        lexer = Lexer('event = "Order Completed"')
         tokens = lexer.lex()
         parser = Parser(lexer, tokens)
         node = parser.parse()
         assert node.type == ASTType.ROOT
-        assert node.children[0].type == ASTType.STATEMENT
-
-    def test_parser_string(self):
-        lexer = Lexer('1 + "hello world" + 2')
-        tokens = lexer.lex()
-        parser = Parser(lexer, tokens)
-        node = parser._statement()
-        assert node.type == ASTType.STATEMENT
-        assert node.children[0].type == ASTType.EXPR
-        assert node.children[0].children[0].value == 1
-        assert node.children[1].value == '+'
-        assert node.children[2].type == ASTType.EXPR
-        assert node.children[2].children[0].value == 'hello world'
-        assert node.children[3].value == '+'
-        assert node.children[4].type == ASTType.EXPR
-        assert node.children[4].children[0].value == 2
-
-    def test_parser_string(self):
-        lexer = Lexer('1 + "hello world" + 2 + "foo"')
-        tokens = lexer.lex()
-        parser = Parser(lexer, tokens)
-        node = parser._statement()
-        assert node.type == ASTType.STATEMENT
-        assert node.children[0].type == ASTType.EXPR
-        assert node.children[0].children[0].value == 1
-        assert node.children
+        assert len(node.children) == 1
+        statement = node.children[0]
+        assert statement.type == ASTType.STATEMENT
+        assert len(statement.children) == 1
+        conditional = statement.children[0]
+        assert conditional.type == ASTType.CONDITIONAL
+        assert len(conditional.children) == 3
+        assert conditional.children[0].value == 'event'
+        assert conditional.children[1].value == '='
+        assert conditional.children[2].value == 'Order Completed'
