@@ -5,8 +5,9 @@ class ASTNode:
 
     def __repr__(self):
         if self.children:
-            return f'{self.type} ({self.children})'
-        return f'{self.type}'
+            return f'<{self.type} (Children: {self.children})>'
+
+        return f'<{self.type}>'
 
     def is_leaf(self):
         return not self.children
