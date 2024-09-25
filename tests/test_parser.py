@@ -7,7 +7,7 @@ class TestParser:
     def test_parser(self):
         lexer = Lexer('true')
         tokens = lexer.lex()
-        parser = Parser(lexer, tokens)
+        parser = Parser(tokens)
         node = parser.parse()
         assert node.type == ASTType.ROOT
         assert node.children[0].type == ASTType.STATEMENT
@@ -17,14 +17,13 @@ class TestParser:
         assert grandchild.type == ASTType.EXPR
         assert len(grandchild.children) > 0
         greatgrandchild = grandchild.children[0]
-        assert len(greatgrandchild.children) > 0
-        assert greatgrandchild.children[0].value == 'true'
+        assert greatgrandchild.value == 'true'
         
 
     def test_parser_event(self):
         lexer = Lexer('event = "Order Completed"')
         tokens = lexer.lex()
-        parser = Parser(lexer, tokens)
+        parser = Parser(tokens)
         node = parser.parse()
         assert node.type == ASTType.ROOT
         assert len(node.children) == 1
@@ -42,7 +41,7 @@ class TestParser:
     def test_parser_path(self):
         lexer = Lexer('properties.product = "dfs"')
         tokens = lexer.lex()
-        parser = Parser(lexer, tokens)
+        parser = Parser(tokens)
         node = parser.parse()
         assert node.type == ASTType.ROOT
         assert len(node.children) == 1
@@ -64,7 +63,7 @@ class TestParser:
     def test_parser_or(self):
         lexer = Lexer('!(event = "User Created" or event = "Product Account Created" or event = "User Status Changed")')
         tokens = lexer.lex()
-        parser = Parser(lexer, tokens)
+        parser = Parser(tokens)
         node = parser.parse()
         assert node.type == ASTType.ROOT
         assert len(node.children) == 1

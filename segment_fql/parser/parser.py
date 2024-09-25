@@ -3,7 +3,7 @@ from segment_fql.parser.ast_node import ASTNode
 from segment_fql.parser.ast_type import ASTType
 
 class Parser:
-    def __init__(self, lexer, tokens):
+    def __init__(self, tokens):
         self.supported_functions = ['contains', 'match']
         self.queue = tokens
 
@@ -72,7 +72,17 @@ class Parser:
         left_operand = self._next()
         upcoming = self.queue[0]
 
-        if upcoming.type not in [TokenType.Operator, TokenType.Ident, TokenType.Number, TokenType.String, TokenType.Null, TokenType.BrackLeft, TokenType.ParenLeft, TokenType.Dot]:
+        if upcoming.type not in [
+            TokenType.Operator, 
+            TokenType.Ident, 
+            TokenType.Number, 
+            TokenType.String,
+            TokenType.Null, 
+            TokenType.BrackLeft, 
+            TokenType.ParenLeft, 
+            TokenType.Dot,
+            TokenType.EOS
+        ]:
             raise Exception(f'Unsupported token: {upcoming.type} ({upcoming.value})')
 
         if upcoming.type == TokenType.Dot or upcoming.type == TokenType.Ident:
