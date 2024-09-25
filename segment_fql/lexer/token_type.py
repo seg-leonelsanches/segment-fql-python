@@ -6,6 +6,7 @@ class TokenType(str, Enum):
     Dot = 'dot',
     Operator = 'operator',
     Conditional = 'conditional',
+    Logical = 'logical',
     String = 'string',
     Number = 'number',
     Null = 'null',

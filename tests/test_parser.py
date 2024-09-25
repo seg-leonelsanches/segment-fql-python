@@ -37,3 +37,50 @@ class TestParser:
         assert conditional.children[0].value == 'event'
         assert conditional.children[1].value == '='
         assert conditional.children[2].value == 'Order Completed'
+
+
+    def test_parser_or(self):
+        lexer = Lexer('!(event = "User Created" or event = "Product Account Created" or event = "User Status Changed")')
+        tokens = lexer.lex()
+        parser = Parser(lexer, tokens)
+        node = parser.parse()
+        assert node.type == ASTType.ROOT
+        assert len(node.children) == 1
+        statement = node.children[0]
+        assert statement.type == ASTType.STATEMENT
+        assert len(statement.children) == 1
+        not_node = statement.children[0]
+        assert not_node.type == ASTType.NOT
+        assert len(not_node.children) == 1
+        grouping = not_node.children[0]
+        assert grouping.type == ASTType.GROUPING
+        assert len(grouping.children) == 1
+        statement = grouping.children[0]
+        assert statement.type == ASTType.STATEMENT
+        assert len(statement.children) == 3
+        first_conditional = statement.children[0]
+        assert first_conditional.children[0].value == 'event'
+        assert first_conditional.children[1].value == '='
+        assert first_conditional.children[2].value == 'User Created'
+        first_logical_connector = statement.children[1]
+        assert first_logical_connector.value == 'or'
+        second_statement = statement.children[2]
+        assert len(second_statement.children) == 3
+        second_conditional_event = second_statement.children[0]
+        assert second_conditional_event.type == ASTType.CONDITIONAL
+        assert len(second_conditional_event.children) == 3
+        assert second_conditional_event.children[0].value == 'event'
+        assert second_conditional_event.children[1].value == '='
+        assert second_conditional_event.children[2].value == 'Product Account Created'
+        second_logical_connector = second_statement.children[1]
+        assert second_logical_connector.value == 'or'
+        third_conditional = second_statement.children[2]
+        assert third_conditional.type == ASTType.STATEMENT
+        assert len(third_conditional.children) == 1
+        third_conditional_event = third_conditional.children[0]
+        assert third_conditional_event.type == ASTType.CONDITIONAL
+        assert len(third_conditional_event.children) == 3
+        assert third_conditional_event.children[0].value == 'event'
+        assert third_conditional_event.children[1].value == '='
+        assert third_conditional_event.children[2].value == 'User Status Changed'
+        

@@ -16,8 +16,8 @@ class Lexer:
             'event': Token(TokenType.Ident, 'event'),
             'contains': Token(TokenType.Ident, 'contains'),
             'match': Token(TokenType.Ident, 'match'),
-            'and': Token(TokenType.Conditional, 'and'),
-            'or': Token(TokenType.Conditional, 'or'),
+            'and': Token(TokenType.Logical, 'and'),
+            'or': Token(TokenType.Logical, 'or')
         }
 
     def lex(self):

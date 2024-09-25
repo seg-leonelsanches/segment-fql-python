@@ -17,21 +17,23 @@ class Parser:
         node = ASTNode(ASTType.STATEMENT)
         expression = self._expression()
         node.children.append(expression)
+        next_token = self.queue[0]
 
-        if self.queue[0].type == TokenType.EOS:
+        # End of statement, or right parenthesis, to be solved by parent `grouping`.
+        if next_token.type == TokenType.EOS or next_token.type == TokenType.ParenRight:
             return node
 
-        if self.queue[0].type == TokenType.Operator:
-            node.children.append(self._operator())
-            node.children.append(self._expression())
+        if next_token.type == TokenType.Logical:
+            node.children.append(self._next())
+            node.children.append(self._statement())
             return node
 
         first_child = expression.children[0]
         expression_is_function = first_child is not None and first_child.type == ASTType.FUNC
-        if expression_is_function and self.queue[0].type == TokenType.Conditional:
+        if expression_is_function and next_token.type == TokenType.Conditional:
             return node
 
-        raise Exception(f'Unexpected token in statement: {self.queue[0].type} ({self.queue[0].value})')
+        raise Exception(f'Unexpected token in statement: {next_token.type} ({next_token.value})')
 
     def _conditional(self, left_operand):
         node = ASTNode(ASTType.CONDITIONAL)
@@ -51,18 +53,37 @@ class Parser:
 
         return node
 
+    def _grouping(self):
+        node = ASTNode(ASTType.GROUPING)
+        testing_left_paren = self._next()
+        
+        if testing_left_paren.type != TokenType.ParenLeft:
+            raise Exception(f'Expected "\(", got {testing_left_paren.type} ({testing_left_paren.value})')
+
+        node.children.append(self._statement())
+        testing_right_paren = self._next()
+
+        if testing_right_paren.type != TokenType.ParenRight:
+            raise Exception(f'Expected "\)", got {testing_right_paren.type} ({testing_right_paren.value})')
+        
+        return node
+
     def _expression(self):
-        first_child = self._next()
+        left_operand = self._next()
         upcoming = self.queue[0]
 
-        if upcoming.type not in [TokenType.Operator, TokenType.Ident, TokenType.Number, TokenType.String, TokenType.Null, TokenType.BrackLeft]:
+        if upcoming.type not in [TokenType.Operator, TokenType.Ident, TokenType.Number, TokenType.String, TokenType.Null, TokenType.BrackLeft, TokenType.ParenLeft]:
             raise Exception(f'Unsupported token: {upcoming.type} ({upcoming.value})')
 
         if upcoming.type == TokenType.Operator:
-            return self._conditional(first_child)
+            return self._conditional(left_operand)
+        elif left_operand.type == TokenType.Operator and upcoming.type == TokenType.ParenLeft:
+            node = ASTNode(ASTType.NOT)
+            node.children.append(self._grouping())
+        else: # Unary operator
+            node = ASTNode(ASTType.EXPR)
+            node.children.append(left_operand)
 
-        node = ASTNode(ASTType.EXPR)
-        node.children.append(first_child)
         return node
         
 

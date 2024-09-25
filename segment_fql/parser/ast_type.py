@@ -6,6 +6,8 @@ class ASTType(str, Enum):
     PATH = 'path',
     FUNC = 'func',
     ERR = 'err',
+    NOT = 'not',
     OPERATOR = 'operator',
     CONDITIONAL = 'conditional',
-    STATEMENT = 'statement'
+    STATEMENT = 'statement',
+    GROUPING = 'grouping'

@@ -42,3 +42,19 @@ class TestLexer:
         assert tokens[2] == Token(TokenType.String, 'Order Completed')
         assert tokens[3] == Token(TokenType.EOS, 'eos')
 
+    def test_lexer_or(self):
+        lexer = Lexer('event = "User Created" or event = "Product Account Created" or event = "User Status Changed"')
+        tokens = lexer.lex()
+        assert tokens[0] == Token(TokenType.Ident, 'event')
+        assert tokens[1] == Token(TokenType.Operator, '=')
+        assert tokens[2] == Token(TokenType.String, 'User Created')
+        assert tokens[3] == Token(TokenType.Logical, 'or')
+        assert tokens[4] == Token(TokenType.Ident, 'event')
+        assert tokens[5] == Token(TokenType.Operator, '=')
+        assert tokens[6] == Token(TokenType.String, 'Product Account Created')
+        assert tokens[7] == Token(TokenType.Logical, 'or')
+        assert tokens[8] == Token(TokenType.Ident, 'event')
+        assert tokens[9] == Token(TokenType.Operator, '=')
+        assert tokens[10] == Token(TokenType.String, 'User Status Changed')
+        assert tokens[11] == Token(TokenType.EOS, 'eos')
+
