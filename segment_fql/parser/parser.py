@@ -72,9 +72,12 @@ class Parser:
         left_operand = self._next()
         upcoming = self.queue[0]
 
-        if upcoming.type not in [TokenType.Operator, TokenType.Ident, TokenType.Number, TokenType.String, TokenType.Null, TokenType.BrackLeft, TokenType.ParenLeft]:
+        if upcoming.type not in [TokenType.Operator, TokenType.Ident, TokenType.Number, TokenType.String, TokenType.Null, TokenType.BrackLeft, TokenType.ParenLeft, TokenType.Dot]:
             raise Exception(f'Unsupported token: {upcoming.type} ({upcoming.value})')
 
+        if upcoming.type == TokenType.Dot or upcoming.type == TokenType.Ident:
+            left_operand = self._pathOrFunction(left_operand)
+            upcoming = self.queue[0]
         if upcoming.type == TokenType.Operator:
             return self._conditional(left_operand)
         elif left_operand.type == TokenType.Operator and upcoming.type == TokenType.ParenLeft:

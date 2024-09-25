@@ -23,6 +23,16 @@ class TestLexer:
         assert tokens[2] == Token(TokenType.Number, '2')
         assert tokens[3] == Token(TokenType.EOS, 'eos')
 
+    def test_lexer_path(self):
+        lexer = Lexer('properties.product = "dfs"')
+        tokens = lexer.lex()
+        assert tokens[0] == Token(TokenType.Ident, 'properties')
+        assert tokens[1] == Token(TokenType.Dot, '.')
+        assert tokens[2] == Token(TokenType.Ident, 'product')
+        assert tokens[3] == Token(TokenType.Operator, '=')
+        assert tokens[4] == Token(TokenType.String, 'dfs')
+        assert tokens[5] == Token(TokenType.EOS, 'eos')
+
     def test_lexer_not(self):
         lexer = Lexer('!(1 = "hello")')
         tokens = lexer.lex()

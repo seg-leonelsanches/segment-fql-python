@@ -39,6 +39,28 @@ class TestParser:
         assert conditional.children[2].value == 'Order Completed'
 
 
+    def test_parser_path(self):
+        lexer = Lexer('properties.product = "dfs"')
+        tokens = lexer.lex()
+        parser = Parser(lexer, tokens)
+        node = parser.parse()
+        assert node.type == ASTType.ROOT
+        assert len(node.children) == 1
+        statement = node.children[0]
+        assert statement.type == ASTType.STATEMENT
+        assert len(statement.children) == 1
+        conditional = statement.children[0]
+        assert conditional.type == ASTType.CONDITIONAL
+        assert len(conditional.children) == 3
+        first_conditional_child = conditional.children[0]
+        assert first_conditional_child.type == ASTType.PATH
+        assert len(first_conditional_child.children) == 3
+        assert first_conditional_child.children[0].value == 'properties'
+        assert first_conditional_child.children[1].value == '.'
+        assert first_conditional_child.children[2].value == 'product'
+        assert conditional.children[1].value == '='
+        assert conditional.children[2].value == 'dfs'
+
     def test_parser_or(self):
         lexer = Lexer('!(event = "User Created" or event = "Product Account Created" or event = "User Status Changed")')
         tokens = lexer.lex()

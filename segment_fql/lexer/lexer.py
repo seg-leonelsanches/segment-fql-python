@@ -84,7 +84,7 @@ class Lexer:
         if coming_up is not None and not (self._is_terminator(coming_up) or coming_up in ['!', '=', '(', '.']):
             raise Exception(f'Expected termination character after identifier, got {coming_up}')
 
-        result = result.strip()
+        result = result.strip().strip('.')
 
         if result in self.reserved_keywords:
             return self.reserved_keywords[result]
